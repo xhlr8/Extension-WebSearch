@@ -2,7 +2,8 @@
 
 ## Offline automated checks
 
-- 106 frontend adapter, module-link, workbench DOM, deferred chat-race, response-size and serialized payload tests passed.
+- 110 frontend adapter, module-link, optional-provider, workbench DOM, deferred chat-race, response-size and serialized payload tests passed.
+- A non-executing module-graph diagnostic reproduced the installed missing textgen-settings.js failure and linked the patched extension against 139 actual static modules served by the target SillyTavern fork.
 - Companion repository: 44 authenticated API/validation/ownership tests passed.
 - Separate development integration fixture linked the actual adapter and companion routes to a fake provider: Search, Extract, Map, Crawl, Research, default-off gate, polling after opt-out, cross-user denial.
 - Browser mock preview exercised source rendering, Map -> Extract selected -> Import, Research -> polling -> report import, and explicit free-plan unlock. Provider markup was rendered as text.

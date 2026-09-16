@@ -13,7 +13,10 @@ import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.j
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
 import { commonEnumProviders } from '../../../slash-commands/SlashCommandCommonEnumsProvider.js';
-import { textgen_types, textgenerationwebui_settings } from '../../../textgen-settings.js';
+import { createKoboldSettingsReader } from './optional-provider.mjs';
+
+// Some chat-completion-only forks removed this module. Only try it for KoboldCpp.
+const getKoboldCppUrl = createKoboldSettingsReader(() => import('../../../textgen-settings.js'));
 
 const { ensureMessageMediaIsArray } = SillyTavern.getContext();
 const supportsMediaArrays = typeof ensureMessageMediaIsArray === 'function';
@@ -271,8 +274,8 @@ async function isSearchAvailable() {
         return false;
     }
 
-    if (extension_settings.websearch.source === WEBSEARCH_SOURCES.KOBOLDCPP && !textgenerationwebui_settings.server_urls[textgen_types.KOBOLDCPP]) {
-        console.debug('WebSearch: no KoboldCpp server URL');
+    if (extension_settings.websearch.source === WEBSEARCH_SOURCES.KOBOLDCPP && !(await getKoboldCppUrl())) {
+        console.debug('WebSearch: KoboldCpp requires Text Completion support and its configured server URL. Other providers remain available.');
         return false;
     }
 
@@ -1081,7 +1084,8 @@ async function doSeleniumPluginQuery(query) {
  * @returns {Promise<{textBits: string[], links: string[], images: string[]}>} Lines of search results.
  */
 async function doKoboldCppQuery(query) {
-    const url = textgenerationwebui_settings.server_urls[textgen_types.KOBOLDCPP];
+    const url = await getKoboldCppUrl();
+    if (!url) throw new Error('KoboldCpp search requires SillyTavern Text Completion support and a configured KoboldCpp URL. Choose Tavily or another provider on chat-completion-only forks.');
     const result = await providerFetch('/api/search/koboldcpp', {
         method: 'POST',
         headers: getRequestHeaders(),

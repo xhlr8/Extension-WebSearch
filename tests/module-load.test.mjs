@@ -18,6 +18,7 @@ test('extension links and registers its generation hook without removed Extras A
     const imports = [...source.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/g)];
     const stubs = new Map();
     for (const [, names, specifier] of imports) {
+        assert.notEqual(specifier, '../../../textgen-settings.js', 'Optional Text Completion module must not be a static import');
         if (specifier.startsWith('./')) continue;
         const keys = names.split(',').map(x => x.trim()).filter(Boolean);
         // Validate fixture also excludes APIs this fork intentionally removed.

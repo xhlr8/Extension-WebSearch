@@ -9,6 +9,8 @@ An English-language fork of [SillyTavern/Extension-WebSearch](https://github.com
 
 The companion is optional. Without it, legacy Tavily search still uses SillyTavern's existing backend, but advanced settings cannot be applied. The UI clearly labels that fallback and disables companion-only operations. A broken or unauthorized companion is reported instead of silently causing a second paid request.
 
+KoboldCpp is an optional capability: its Text Completion settings module is loaded only when KoboldCpp is selected. Chat-completion-only forks without that module can still use Tavily and the other providers.
+
 ## Installation
 
 Back up your current extension/configuration first. Do not install both the original and this fork at once: they use the same tool names, setting IDs and generation hook.
