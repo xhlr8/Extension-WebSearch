@@ -1,177 +1,116 @@
-# Extension-WebSearch
+# WebSearch Plus
 
-Add web search results to LLM prompts.
+An English-language fork of [SillyTavern/Extension-WebSearch](https://github.com/SillyTavern/Extension-WebSearch), with deprecated Extras removed and an optional modern Tavily workbench.
 
-## Available sources
+## Two components, no core patch
 
-### Selenium Plugin
+1. **This extension**: fixes loading on SillyTavern forks without the Extras exports and preserves SerpApi, Serper, SearXNG, Selenium, KoboldCpp, Z.AI and Tavily. It registers the existing WebSearch / VisitLinks tools, slash command and Data Bank scraper.
+2. **[Tavily companion server plugin](https://github.com/xhlr8/SillyTavern-Tavily-Companion)**: adds server-side Search, Extract, Map, Crawl, Research and Usage. Credentials never need to be exposed to the browser or stored in this repository.
 
-Requires an official server plugin to be installed and enabled.
+The companion is optional. Without it, legacy Tavily search still uses SillyTavern's existing backend, but advanced settings cannot be applied. The UI clearly labels that fallback and disables companion-only operations. A broken or unauthorized companion is reported instead of silently causing a second paid request.
 
-See [SillyTavern-WebSearch-Selenium](https://github.com/SillyTavern/SillyTavern-WebSearch-Selenium) for more details.
+## Installation
 
-Supports Google and DuckDuckGo engines.
+Back up your current extension/configuration first. Do not install both the original and this fork at once: they use the same tool names, setting IDs and generation hook.
 
-### Extras API
+Install this URL through SillyTavern's extension installer:
 
-Requires a `websearch` module and Chrome/Firefox web browser installed on the host machine.
+https://github.com/xhlr8/Extension-WebSearch
 
-Supports Google and DuckDuckGo engines.
+For an existing clean checkout of the original extension, advanced users can repoint its origin to this fork and fast-forward. Do not reset/discard local edits. Installing through the extension manager is generally simpler.
 
-### SerpApi
+Install the companion following its README under SillyTavern's plugins directory, enable server plugins in configuration, and **restart SillyTavern when you choose**. Server-plugin installation is distinct from frontend extension installation. No script in these repositories automatically installs, restarts, updates or modifies your SillyTavern core.
 
-Requires SerpApi key and provides access to Google search.
+Set the Tavily key with the existing **Tavily AI Key** button in Web Search settings. The companion reads the active SillyTavern user's Tavily secret. DSH's Windows TAVILY_API_KEY is unrelated. Do not put keys in source control.
 
-Get the key here: <https://serpapi.com/dashboard>
+Automatic updates are disabled in this fork's manifest for predictable rollouts. Review changes and update explicitly. Your SillyTavern-wide auto-update settings may independently affect updates; review them too.
 
-### SearXNG
+## Free-plan preset (default)
 
-Requires a SearXNG instance URL (either private or public). Uses HTML format for search results.
+Designed for Tavily's documented 1,000-credit free monthly allowance. Search defaults to basic (1 credit), five results, automatic parameter selection OFF, generated answer/raw content/images OFF. Requesting fewer results saves context, not per-search credits. No API test runs automatically and no test in this repository spends credits.
 
-SearXNG preferences string: obtained from SearXNG - preferences - COOKIES - Copy preferences hash
+On first use of this fork, a one-time migration applies these conservative Tavily settings, turns automatic Visit Links OFF, and limits model-initiated page reads to the first 3 requested URLs. A notice is shown; existing provider selection, credentials and activation mode are preserved. Subsequent manual changes remain saved. Manual extraction can still batch up to 20 URLs. Use the Free-plan search preset to restore conservative settings later.
 
-Learn more: <https://docs.searxng.org/>
+**Map, Crawl and Research are kept but disabled by default**, not merely hidden. Explicitly enable them for the signed-in user through the companion-backed session opt-in control, then confirm each individual request. Turning the preference off blocks new costly tasks but leaves polling/forgetting existing research available. The backend resets this nonpersistent preference on restart/expiry; saved browser settings cannot bypass it.
 
-### Tavily AI
+The opt-in is not a credit budget. Use Tavily's API-key/account limits for provider-enforced spending limits. Research Mini can use up to the currently documented 110 credits; Pro up to 250. Stopping local monitoring does not cancel billing.
 
-Requires an API key.
+## Features
 
-Get the key here: <https://app.tavily.com/>
+### Search
 
-### KoboldCpp
+- Quick, Detailed and Recent News presets, plus advanced settings.
+- Basic / advanced / fast / ultra-fast depth; result and chunk limits.
+- General / news / finance topics; date windows and estimated publication dates.
+- Domain allow/block lists; prefer domains or strictly restrict them.
+- English-language preference (not mandatory exclusion of other languages), strict language toggle and country preference.
+- Optional generated answer, cleaned raw content, image descriptions, favicons and usage.
+- Automatic parameter choice remains opt-in. Explicit parameters override automatic choices; depth can affect credit cost.
+- Structured evidence with a source ID, title, URL and excerpt. Dates and relevance scores are metadata, not truth guarantees.
+- A sources/result display also receives ordinary model-tool search results.
 
-KoboldCpp URL must be provided in Text Completion API settings. KoboldCpp version must be >= 1.81.1 and WebSearch module must be enabled on startup: enable Network => Enable WebSearch in the GUI launcher or add `--websearch` to the command line.
+New installations default to basic search, five results, English preference, generated answer off, images off, and an 8,000-character evidence budget. Existing prompt budgets, provider credentials and activation settings are preserved; the first-use free-plan migration described above resets only Tavily request options and automatic visit/image behavior. Selecting Extras from an old installation migrates to Tavily but disables automatic activation until you configure and enable it.
 
-See: <https://github.com/LostRuins/koboldcpp/releases/tag/v1.81.1>
+### Page reading
 
-### Serper
+VisitLinks uses Tavily Extract when the selected provider is Tavily and the companion is available. It supports batches of up to 20 public URLs, Markdown/text, basic/advanced extraction, optional query-focused chunks and partial failures. The basic HTML reader remains available as a fallback. No extraction can guarantee access to paywalls/login-only pages.
 
-Requires an API key.
+### Map / Crawl and Data Bank
 
-Get the key here: <https://serper.dev/>
+Explicit workbench actions discover URLs or extract a bounded set of pages. Defaults stay on the starting domain; depth, breadth and total page limits prevent unbounded exploration. Preview/select content before importing to the **current chat's Data Bank**, or download it. Imports do not edit characters or lorebooks.
 
-## Z.AI
+Map discovers URLs only; use Extract selected to read those pages. Crawl discovers and reads pages. Both require a new confirmation before each run. Remote page content is shown as text, never executable HTML.
 
-Requires an API key. Not compatible with the Coding API subscription!
+### Research
 
-Get the key here: <https://z.ai/manage-apikey/apikey-list/>
+An explicit paid Tavily Research task can use mini, pro or auto, with report length and citation options. The workbench shows task status while polling, then the resulting report and sources. This is Tavily's research agent, not an unbounded loop of your chat model.
 
-Docs: <https://docs.z.ai/api-reference/tools/web-search>
+The task ID is saved in your user settings for explicit resume after closing/reloading the panel. The companion keeps ownership in memory for up to 24 hours: a server/plugin restart loses that ownership, so old IDs cannot be resumed through this plugin afterward. Check the Tavily dashboard if submission returned no ID or the server restarted.
 
-## How to use
+**Stopping monitoring does not cancel the provider task or refund credits.** Submitting an expensive task requires confirmation. Research is not registered as an automatic LLM tool. No private chat history, character cards or attached files are automatically sent to Research—only the input you submit and selected request options.
 
-1. Make sure you use the latest version of SillyTavern (staging branch preferred).
-2. Install the extension via the "Download Extensions & Assets" menu in SillyTavern.
-3. Open the "Web Search" extension settings, set your API key, and enable the extension.
-4. The web search results will be added to the prompt organically as you chat. **Only user messages trigger the search.**
-5. To include search results more organically, wrap search queries with single backticks: ```Tell me about the `latest Ryan Gosling movie`.``` will produce a search query `latest Ryan Gosling movie`.
-6. Optionally, configure the settings to your liking.
+### Reliability and privacy
 
-## Settings.
+- Session-scoped caches keyed by query + provider + options; no cross-account disk cache of results. Reloading clears caches.
+- Tavily news/day searches are cached at most five minutes, other searches at most one hour, respecting a shorter configured cache lifetime.
+- Bounded results, page limits, request timeouts and abort controls.
+- Paid POSTs are not automatically repeated after uncertain network failures.
+- Authentication, quota and rate-limit failures are reported as failures, not successful empty searches.
+- Website text is untrusted reference material. It must not override your system instructions or authorize unrelated tool calls.
+- Public HTTP(S) URLs only for the enhanced operations; local addresses, credentials in URLs and onion addresses are rejected.
 
-### General
+## Activation
 
-1. Enabled - toggles the extension on and off.
-2. Sources = sets the search results source.
-3. Cache Lifetime - how long (in seconds) the search results are cached for your prompt. Default = one week.
+Enable Web Search after selecting a provider and setting the needed credentials. Function tools need a compatible Chat Completion API with tool calling enabled. When function-tool mode is active it takes precedence over automatic text triggers.
 
-### Prompt Settings
+The existing backtick, trigger-phrase and regex modes, /websearch slash command and Data Bank scraper remain available. Map/Crawl/Research always require separate explicit workbench actions.
 
-1. Prompt Budget - sets the maximum capacity of the inserted text (in characters of text, NOT tokens). Rule of thumb: 1 token ~ 3-4 characters, adjust according to your model's context limits. Default = 1500 characters.
-2. Insertion Template - how the result gets inserted into the prompt. Supports the usual macro + special macro: `{{query}}` for search query and `{{text}}` for search results.
-3. Injection Position - where the result goes in the prompt. The same options as for the Author's Note: as in-chat injection or before/after system prompt.
+## Cost awareness
 
-### Search Activation
+Provider pricing can change. Current documentation lists basic/fast/ultra-fast Search at 1 credit, advanced Search at 2. Extract is billed per five successful URLs (basic 1 credit, advanced 2). Map is billed per ten returned pages, with extra cost for instructions; Crawl combines mapping and extraction.
 
-1. Use Function Tool - uses [function calling](https://docs.sillytavern.app/for-contributors/function-calling/) to activate search or scrape web pages. Must use a supported Chat Completion API and be enabled in the AI Response settings. **Disables all other activation methods when engaged.**
-2. Use Backticks - enables search activation using words encased in single backticks.
-3. Use Trigger Phrases - enables search activation using trigger phrases.
-4. Regular expressions - provide a JS-flavored regex to match the user message. If the regex matches, the search with a given query will be triggered. Search query supports `{{macros}}` and $1-syntax to reference the matched group. Example: `/what is happening in (.*)/i` regex for search query `news in $1` will match a message containing `what is happening in New York` and trigger the search with the query `news in New York`.
-5. Trigger Phrases - add phrases that will trigger the search, one by one. It can be anywhere in the message, and the query starts from the trigger word and spans to "Max Words" total. To exclude a specific message from processing, it must start with a period, e.g. `.What do you think?`. Priority of triggers: first by order in the textbox, then the first one in the user message.
-6. Max Words - how many words are included in the search query (including the trigger phrase). Google has a limit of about 32 words per prompt. Default = 10 words.
+Research is substantially more expensive: the documented range is **4–110 credits for mini** and **15–250 for pro**. Displayed figures are guidance, not a hard per-request spending cap. Enforce account/API-key limits through Tavily. No charge can be prevented merely by closing the browser or cancelling local polling.
 
-### Page Scraping
+## Development
 
-1. Visit Links - text will be extracted from the visited search result pages and saved to a file attachment.
-2. Visit Count - how many links will be visited and parsed for text.
-3. Visit Domain Blacklist - site domains to be excluded from visiting. One per line.
-4. File Header - file header template, inserted at the start of the text file, has an additional `{{query}}` macro.
-5. Block Header - link block template, inserted with the parsed content of every link. Use `{{link}}` macro for page URL and `{{text}}` for page content.
-6. Save Target - where to save the results of scraping. Possible options: trigger message attachments, chat attachments of Data Bank (only on release >=1.12.0), or just images (if the source supports them).
-7. Include Images - attach relevant images to the chat. Requires a source that supports images (see below).
+Node 20+ for offline tests:
 
-## More info
+~~~sh
+npm test
+# Equivalent: node --experimental-vm-modules --test tests/*.test.mjs
+node --check index.js
+~~~
 
-Search results from the latest query will stay included in the prompt until the next valid query is found.
-If you want to ask additional questions without accidentally triggering the search, start your message with a period.
+Tests mock the provider and never require an API key or use paid search credits. Do not test against a running personal installation without its owner's approval.
 
-Priority of triggers (if multiple are enabled):
+## References
 
-1. Backticks.
-2. Regular expressions.
-3. Trigger phrases.
+- [Search API](https://docs.tavily.com/documentation/api-reference/endpoint/search)
+- [Extract API](https://docs.tavily.com/documentation/api-reference/endpoint/extract)
+- [Map](https://docs.tavily.com/documentation/api-reference/endpoint/map) / [Crawl](https://docs.tavily.com/documentation/api-reference/endpoint/crawl)
+- [Research](https://docs.tavily.com/documentation/api-reference/endpoint/research)
+- [Credits and pricing](https://docs.tavily.com/documentation/api-credits)
 
-To discard all previous queries from processing, start the user message with an exclamation mark, for example, a user message `!Now let's talk about...` will discard this and every message above it.
+## License
 
-This extension also provides a `/websearch` slash command to use in STscript. More info here: <https://docs.sillytavern.app/usage/st-script/>
-
-```txt
-/websearch (links=on|off snippets=on|off [query]) – performs a web search query. Use named arguments to specify what to return - page snippets (default: on) or full parsed pages (default: off) or both.
-
-Example: /websearch links=off snippets=on how to make a sandwich
-```
-
-### What can be included in the search result?
-
-**Thesaurus:**
-
-- Answer box: Direct answer to the question.
-- Knowledge graph: Encyclopedic knowledge about the topic.
-- Page snippets: Relevant extracts from the web pages.
-- Relevant questions: Questions and answers to similar topics.
-- Images: Relevant images.
-
-#### SerpApi
-
-1. Answer box.
-2. Knowledge graph.
-3. Page snippets (max 10).
-4. Relevant questions (max 10).
-5. Images (max 10).
-
-#### Selenium Plugin and Extras API
-
-1. Google - answer box, knowledge graph, page snippets.
-2. DuckDuckGo - page snippets.
-
-**Selenium Plugin** can additionaly provide images.
-
-#### SearXNG
-
-1. Infobox.
-2. Page snippets.
-3. Images.
-
-#### Tavily AI
-
-1. Answer.
-2. Page contents.
-3. Images (up to 5).
-
-#### KoboldCpp
-
-1. Page titles.
-2. Page snippets.
-
-#### Serper
-
-1. Answer box.
-2. Knowledge graph.
-3. Page snippets.
-4. Relevant questions.
-5. Images.
-
-#### Z.AI
-
-1. Page titles.
-2. Page snippets.
+AGPL-3.0. Original extension by Cohee1207 and contributors. Enhancements maintained in xhlr8's fork. The upstream license is retained.

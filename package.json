@@ -1,0 +1,12 @@
+{
+  "name": "st-websearch-plus",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules --test tests/client.test.mjs tests/module-load.test.mjs tests/panel.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
