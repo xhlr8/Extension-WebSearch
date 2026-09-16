@@ -73,7 +73,9 @@ The task ID is saved in your user settings for explicit resume after closing/rel
 
 - Session-scoped caches keyed by query + provider + options; no cross-account disk cache of results. Reloading clears caches.
 - Tavily news/day searches are cached at most five minutes, other searches at most one hour, respecting a shorter configured cache lifetime.
-- Bounded results, page limits, request timeouts and abort controls.
+- Bounded results, page limits, request timeouts and abort controls. Legacy page/image response streams are capped at 8 MiB each; assembled imports at 500,000 characters total.
+- Automatic search captures chat/message identity and discards stale results after chat switches, edits or superseding requests. An already accepted file upload may finish unattached, but never attaches to a new chat.
+- Model tool responses use a separate allowlisted projection bounded by the full serialized JSON character count (256–100,000; default 8,000), including citation metadata/errors. Richer UI image/usage metadata is not dumped into the model context.
 - Paid POSTs are not automatically repeated after uncertain network failures.
 - Authentication, quota and rate-limit failures are reported as failures, not successful empty searches.
 - Website text is untrusted reference material. It must not override your system instructions or authorize unrelated tool calls.
